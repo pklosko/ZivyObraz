@@ -359,6 +359,9 @@ SCD4x SCD4(SCD4x_SENSOR_SCD41);
 Adafruit_BME280 bme;
 #endif
 
+WiFiClient client; //967257+93264= 1060521
+                   //966909+93312= 1060221 => 300B save
+
 /* ---- ADC reading - indoor Battery voltage ---- */
 #ifdef ES3ink
   #define vBatPin ADC1_GPIO2_CHANNEL
@@ -987,7 +990,7 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
 bool checkForNewTimestampOnServer()
 {
   // Connect to the HOST and read data via GET method
-  WiFiClient client; // Use WiFiClient class to create TCP connections
+//  WiFiClient client; // Use WiFiClient class to create TCP connections
   bool connection_ok = false;
   String extraParams = "";
 
@@ -1021,7 +1024,7 @@ bool checkForNewTimestampOnServer()
 void readBitmapData()
 {
   // Connect to the HOST and read data via GET method
-  WiFiClient client; // Use WiFiClient class to create TCP connections
+//  WiFiClient client; // Use WiFiClient class to create TCP connections
 
   // Let's read bitmap
   static const uint16_t input_buffer_pixels = 800; // may affect performance
