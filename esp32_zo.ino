@@ -939,7 +939,7 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
 
     sen_temp = temp.temperature;
     sen_humi  = hum.relative_humidity;
-    return 2;
+    return 1;
   }
 
   // Check SCD40 OR SCD41
@@ -961,7 +961,7 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
     sen_temp = SCD4.getTemperature();
     sen_humi = SCD4.getHumidity();
     sen_pres = SCD4.getCO2();
-    return 3;
+    return 2;
     // temperature, humidity and CO2 linked to "pres" variable
   //  extraParams = "&temp=" + String(temperature) + "&hum=" + String(humidity) + "&pres=" + String(co2);
   }
@@ -1001,8 +1001,12 @@ bool checkForNewTimestampOnServer()
 
   if (sen_ret){
     extraParams = "&temp=" + String(temperature) + "&hum=" + String(humidity);
-    if (sen_ret == 3){
-      extraParams += "&pres=" + String(pressure);
+    switch(sen_ret){
+      case 2 : extraParams += "&co2=" + String(pressure); // SCD4x
+               break;
+      case 3 : extraParams += "&pres=" + String(pressure); // BME280
+               break;
+
     }
   }
   #ifdef ESPink
