@@ -920,6 +920,12 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
 
 int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
   Wire.begin();
+  Wire.beginTransmission (0);
+//  int error = Wire.endTransmission();
+  if (Wire.endTransmission()){
+    Serial.println("NO SENSOR FOUND");        
+    return 0;
+  }
   
   // Check SHT40 OR SHT41 OR SHT45
   if (sht4.begin()){
