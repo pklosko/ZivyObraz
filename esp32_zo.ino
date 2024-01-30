@@ -789,7 +789,6 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
                "&y=" + String(DISPLAY_RESOLUTION_Y) +
                "&c=" + String(defined_color_type) +
                "&fw=" + String(firmware) +
-               "&devPK=1" +
                extraParams;
 
   Serial.print("connecting to ");
@@ -815,6 +814,7 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
   Serial.println(String("http://") + host + "/" + url);
   client.print(String("GET ") + "/" + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
+               "X-Develop-Version: @pklosko\r\n" +
                "Connection: " + (checkTimestamp ? "keep-alive" : "close") + "\r\n\r\n"); // Keep-alive for 1st request
   Serial.println("request sent");
 
@@ -922,33 +922,20 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
   Wire.begin();
   
   // Check SHT40 OR SHT41 OR SHT45
-  if (!sht4.begin())
-  {
-    Serial.println("SHT4x not found");
-  }
-  else
-  {
+  if (sht4.begin()){
     Serial.println("SHT4x FOUND");
     sht4.setPrecision(SHT4X_LOW_PRECISION);
     sht4.setHeater(SHT4X_NO_HEATER);
-
     sensors_event_t hum, temp;
     sht4.getEvent(&hum, &temp);
-
     sen_temp = temp.temperature;
     sen_humi  = hum.relative_humidity;
     return 1;
   }
 
   // Check BME280
-  if (!bme.begin())
-  {
-    Serial.println("BME280 not found");
-  }
-  else
-  {
+  if (bme.begin()){
     Serial.println("BME280 FOUND");
-
     sen_temp = bme.readTemperature();
     sen_humi = bme.readHumidity();
     sen_pres = bme.readPressure() / 100.0F;
@@ -956,28 +943,21 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
   }
 
   // Check SCD40 OR SCD41
-  if (!SCD4.begin(false, true, false))
-  {
-    Serial.println("SCD41 not found");
-  }
-  else
-  {
+  if (SCD4.begin(false, true, false)){
     Serial.println("SCD4x FOUND");
     SCD4.measureSingleShot();
-
     while (SCD4.readMeasurement() == false) // wait for a new data (approx 30s)
     {
       Serial.println("Waiting for first measurement...");
       delay(1000);
     }
-
     sen_temp = SCD4.getTemperature();
     sen_humi = SCD4.getHumidity();
     sen_pres = SCD4.getCO2();
     return 3;
   }
-
   // No sensor found
+  Serial.println("NO SENSORS FOUND");
   return 0;
 }
 
