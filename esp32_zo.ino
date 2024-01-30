@@ -349,18 +349,20 @@ SPIClass hspi(HSPI);
   // SHT40/41/45
   #include <Wire.h>
   #include "Adafruit_SHT4x.h"
-Adafruit_SHT4x sht4 = Adafruit_SHT4x();
+  Adafruit_SHT4x sht4 = Adafruit_SHT4x();
+
   //SCD40/41
   #include "SparkFun_SCD4x_Arduino_Library.h"
-SCD4x SCD4(SCD4x_SENSOR_SCD41);
+  SCD4x SCD4(SCD4x_SENSOR_SCD41);
+
   //BME280
   #include <Adafruit_Sensor.h>
   #include <Adafruit_BME280.h>
-Adafruit_BME280 bme;
+  Adafruit_BME280 bme;
 #endif
 
-WiFiClient client; //967257+93264= 1060521
-                   //966909+93312= 1060221 => 300B save
+WiFiClient client; //old - at code - 967257+93264= 1060521
+                   //new - here - 966909+93312= 1060221 => 300B save
 
 /* ---- ADC reading - indoor Battery voltage ---- */
 #ifdef ES3ink
@@ -386,7 +388,7 @@ ESP32AnalogRead adc;
 
 /* ---- Server Zivy obraz ----------------------- */
 const char *host = "cdn.zivyobraz.eu";
-const char *firmware = "2.1";
+const char *firmware = "2.2";
 const String wifiPassword = "zivyobraz";
 
 /* ---------- Deepsleep time in minutes --------- */
@@ -787,6 +789,7 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
                "&y=" + String(DISPLAY_RESOLUTION_Y) +
                "&c=" + String(defined_color_type) +
                "&fw=" + String(firmware) +
+               "&devPK=1" +
                extraParams;
 
   Serial.print("connecting to ");
@@ -812,11 +815,12 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
   Serial.println(String("http://") + host + "/" + url);
   client.print(String("GET ") + "/" + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
+               "Connection: " + (checkTimestamp ? "keep-alive" : "close") + "\r\n\r\n"); // Keep-alive for 1st request
   Serial.println("request sent");
 
   // Workaroud for timeout
   uint32_t timeout = millis();
+
   while (client.available() == 0)
   {
     if (millis() - timeout > 10000)
@@ -916,28 +920,19 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
 
 int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
   Wire.begin();
-
-  #ifdef ESPink
-  // LaskaKit ESPInk 2.5 needs to power up uSup
-  setEPaperPowerOn(true);
-  delay(50);
-  #endif
-
-  // Check if supported sensor is connected
   
   // Check SHT40 OR SHT41 OR SHT45
   if (!sht4.begin())
   {
-    Serial.println("SHT4x not found - maybe just not connected? Otherwise check its wiring.");
+    Serial.println("SHT4x not found");
   }
   else
   {
     Serial.println("SHT4x FOUND");
-    sht4.setPrecision(SHT4X_LOW_PRECISION); // highest resolution
-    sht4.setHeater(SHT4X_NO_HEATER); // no heater
+    sht4.setPrecision(SHT4X_LOW_PRECISION);
+    sht4.setHeater(SHT4X_NO_HEATER);
 
-
-    sensors_event_t hum, temp; // temperature and humidity variables
+    sensors_event_t hum, temp;
     sht4.getEvent(&hum, &temp);
 
     sen_temp = temp.temperature;
@@ -945,10 +940,25 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
     return 1;
   }
 
+  // Check BME280
+  if (!bme.begin())
+  {
+    Serial.println("BME280 not found");
+  }
+  else
+  {
+    Serial.println("BME280 FOUND");
+
+    sen_temp = bme.readTemperature();
+    sen_humi = bme.readHumidity();
+    sen_pres = bme.readPressure() / 100.0F;
+    return 2;
+  }
+
   // Check SCD40 OR SCD41
   if (!SCD4.begin(false, true, false))
   {
-    Serial.println("SCD41 not found - maybe just not connected? Otherwise check its wiring.");
+    Serial.println("SCD41 not found");
   }
   else
   {
@@ -964,26 +974,10 @@ int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
     sen_temp = SCD4.getTemperature();
     sen_humi = SCD4.getHumidity();
     sen_pres = SCD4.getCO2();
-    return 2;
-    // temperature, humidity and CO2 linked to "pres" variable
-  //  extraParams = "&temp=" + String(temperature) + "&hum=" + String(humidity) + "&pres=" + String(co2);
-  }
-
-  // Check BME280
-  if(!bme.begin())
-  {
-    Serial.println("BME280 not found - maybe just not connected? Otherwise check its wiring.");
-  }
-  else
-  {
-    Serial.println("BME280 FOUND");
-
-    sen_temp = bme.readTemperature();
-    sen_humi = bme.readHumidity();
-    sen_pres = bme.readPressure() / 100.0F;
     return 3;
-    // temperature, humidity and pressure variable
   }
+
+  // No sensor found
   return 0;
 }
 
@@ -996,6 +990,11 @@ bool checkForNewTimestampOnServer()
 
   // Measuring temperature and humidity?
 #ifdef SENSOR
+  #ifdef ESPink
+    // LaskaKit ESPInk 2.5 needs to power up uSup
+    setEPaperPowerOn(true);
+    delay(50);
+  #endif
 
   float temperature;
   int humidity;
@@ -1005,16 +1004,15 @@ bool checkForNewTimestampOnServer()
   if (sen_ret){
     extraParams = "&temp=" + String(temperature) + "&hum=" + String(humidity);
     switch(sen_ret){
-      case 2 : extraParams += "&co2=" + String(pressure); // SCD4x
+      case 2 : extraParams += "&pres=" + String(pressure); // BME280
                break;
-      case 3 : extraParams += "&pres=" + String(pressure); // BME280
+      case 3 : extraParams += "&co2=" + String(pressure); // SCD4x
                break;
-
     }
   }
   #ifdef ESPink
   // Power down for now
-  setEPaperPowerOn(false);
+    setEPaperPowerOn(false);
   #endif
 #endif
 
@@ -1033,7 +1031,7 @@ void readBitmapData()
 
   int16_t x = display.width() - DISPLAY_RESOLUTION_X;
   int16_t y = display.height() - DISPLAY_RESOLUTION_Y;
-
+  
   uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
   uint8_t output_row_mono_buffer[max_row_width / 8]; // buffer for at least one row of b/w bits
   uint8_t output_row_color_buffer[max_row_width / 8]; // buffer for at least one row of color bits
@@ -1509,8 +1507,7 @@ void setup()
     // requests and downloads of one bitmap from server, since you have to always write whole image
     display.setFullWindow();
     display.firstPage();
-    do
-    {
+    do{
       readBitmapData();
     } while (display.nextPage());
 
