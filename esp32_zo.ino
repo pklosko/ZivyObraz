@@ -19,8 +19,8 @@
  * WiFi manager by tzapu https://github.com/tzapu/WiFiManager
  * QRCode generator: https://github.com/ricmoo/QRCode
  * SHT4x (temperature, humidity): https://github.com/adafruit/Adafruit_SHT4X
- * SCD41 (CO2, temperature, humidity): https://github.com/sparkfun/SparkFun_SCD4x_Arduino_Library
  * BME280 (temperature, humidity, pressure): https://github.com/adafruit/Adafruit_BME280_Library
+ * SCD41 (CO2, temperature, humidity): https://github.com/sparkfun/SparkFun_SCD4x_Arduino_Library
  *
  * original code made by Jean-Marc Zingg and LaskaKit
  * modified by @MultiTricker (https://michalsevcik.eu)
@@ -32,13 +32,14 @@
 
 #define ESPink
 //#define ES3ink
-//#define MakerBadge_revB //also works with A and C
+//#define MakerBadge_revB // also works with A and C
 //#define MakerBadge_revD
 //#define REMAP_SPI
+//#define TTGO_T5_v23 // tested only with 2.13" variant
 
 //////////////////////////////////////////////////////////////
-// Uncomment if supported sensor is connected
-// SHT40/41/45, SCD40/41, BME280 
+// Uncomment if one of the sensors will be connected
+// Supported sensors: SHT40/41/45, SCD40/41, BME280 
 //////////////////////////////////////////////////////////////
 
 #define SENSOR
@@ -58,6 +59,7 @@
 //////////////////////////////////////////////////////////////
 
 // BW
+//#define D_DEPG0213BN    // 122x250, 2.13" (TTGO T5_V2.3_2.13)
 //#define D_GDEY0213B74   // 128x250, 2.13"
 //#define D_GDEW0154T8    // 152x152, 1.54"
 //#define D_GDEY027T91    // 176x264, 2.7"
@@ -81,6 +83,7 @@
 //#define D_HINK_E075A01  // 640x384, 7.5"
 //#define D_GDEQ0583Z31   // 648x480, 5.83"
 #define D_GDEY075Z08    // 800x480, 7.5"
+//#define D_GDEH075Z90    // 880x528, 7.5"
 
 // 4C
 //#define D_WS437YRBW     // 512x368, 4.37"
@@ -124,7 +127,6 @@
 
   #include <esp_adc_cal.h>
   #include <soc/adc_channel.h>
-esp_adc_cal_characteristics_t adc_cal;
 
 #elif defined MakerBadge_revB
   #define PIN_SS 41   // SS
@@ -140,6 +142,15 @@ esp_adc_cal_characteristics_t adc_cal;
   #define PIN_BUSY 42 // PIN_BUSY
   #define ePaperPowerPin 16
   #define enableBattery 14
+
+#elif defined TTGO_T5_v23
+  #define PIN_SS 5   // SS
+  #define PIN_DC 17  // D/C
+  #define PIN_RST 16 // RES
+  #define PIN_BUSY 4 // PIN_BUSY
+  #define ePaperPowerPin 2
+
+
 #else
   #error "Board not defined!"
 #endif
@@ -203,8 +214,12 @@ static const char *defined_color_type = "7C";
 // BW
 ///////////////////////
 
+// D_DEPG0213BN - BW, 122x250px, 2.13"
+#ifdef D_DEPG0213BN
+GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(GxEPD2_213_BN(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // GDEY0213B74 - BW, 128x250px, 2.13"
-#ifdef D_GDEY0213B74
+#elif D_GDEY0213B74
 GxEPD2_BW<GxEPD2_213_GDEY0213B74, GxEPD2_213_GDEY0213B74::HEIGHT> display(GxEPD2_213_GDEY0213B74(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEW0154T8 - BW, 152x152px, 1.54"
@@ -287,6 +302,10 @@ GxEPD2_3C<GxEPD2_583c_Z83, GxEPD2_583c_Z83::HEIGHT> display(GxEPD2_583c_Z83(PIN_
 #elif defined D_GDEY075Z08
 GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEH075Z90 - 3C, 880x528px, 7.5"
+#elif defined D_GDEH075Z90
+GxEPD2_3C<GxEPD2_750c_Z90, GxEPD2_750c_Z90::HEIGHT / 2> display(GxEPD2_750c_Z90(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 ///////////////////////
 // 4C
 ///////////////////////
@@ -351,18 +370,15 @@ SPIClass hspi(HSPI);
   #include "Adafruit_SHT4x.h"
   Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
-  //SCD40/41
+  // SCD40/41
   #include "SparkFun_SCD4x_Arduino_Library.h"
   SCD4x SCD4(SCD4x_SENSOR_SCD41);
 
-  //BME280
+  // BME280
   #include <Adafruit_Sensor.h>
   #include <Adafruit_BME280.h>
   Adafruit_BME280 bme;
 #endif
-
-WiFiClient client; //old - at code - 967257+93264= 1060521
-                   //new - here - 966909+93312= 1060221 => 300B save
 
 /* ---- ADC reading - indoor Battery voltage ---- */
 #ifdef ES3ink
@@ -379,6 +395,9 @@ WiFiClient client; //old - at code - 967257+93264= 1060521
 #elif defined MakerBadge_revD
   #define vBatPin 6
   #define BATT_V_CAL_SCALE 1.05
+
+#elif defined TTGO_T5_v23
+  #define vBatPin 35
 
 #else
 ESP32AnalogRead adc;
@@ -414,7 +433,7 @@ uint64_t timestampNow = 1; // initialize value for timestamp from server
 void setEPaperPowerOn(bool on)
 {
   // use HIGH/LOW notation for better readability
-#ifdef ES3ink
+#if (defined ES3ink) || (defined MakerBadge_revD)
   digitalWrite(ePaperPowerPin, on ? LOW : HIGH);
 #elif !defined M5StackCoreInk
   digitalWrite(ePaperPowerPin, on ? HIGH : LOW);
@@ -443,17 +462,23 @@ int8_t getWifiStrength()
 float getBatteryVoltage()
 {
   float volt;
+  float Vbatt = 0;
 
 #ifdef ES3ink
+  esp_adc_cal_characteristics_t adc_cal;
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 0, &adc_cal);
   adc1_config_channel_atten(vBatPin, ADC_ATTEN_DB_11);
 
   Serial.println("Reading battery on ES3ink board");
 
   digitalWrite(enableBattery, LOW);
-  uint32_t raw = adc1_get_raw(vBatPin);
+  for(uint8_t i=0; i<10; i++){
+    uint32_t raw = adc1_get_raw(vBatPin);
+    Vbatt += raw;  
+  }
   //Serial.println(raw);
-  uint32_t millivolts = esp_adc_cal_raw_to_voltage(raw, &adc_cal);
+  uint32_t millivolts = esp_adc_cal_raw_to_voltage((uint32_t)(Vbatt/10), &adc_cal);
+  
   //Serial.println(millivolts);
   const uint32_t upper_divider = 1000;
   const uint32_t lower_divider = 1000;
@@ -462,19 +487,21 @@ float getBatteryVoltage()
 
 #elif defined M5StackCoreInk
   analogSetPinAttenuation(vBatPin, ADC_11db);
-  esp_adc_cal_characteristics_t *adc_chars =
-    (esp_adc_cal_characteristics_t *)calloc(
-      1, sizeof(esp_adc_cal_characteristics_t));
-  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12,
-                           3600, adc_chars);
-  uint16_t ADCValue = analogRead(vBatPin);
-
-  uint32_t BatVolmV = esp_adc_cal_raw_to_voltage(ADCValue, adc_chars);
+  esp_adc_cal_characteristics_t *adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
+  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 3600, adc_chars);
+  for(uint8_t i=0; i<10; i++){
+    uint16_t ADCValue = analogRead(vBatPin);
+    Vbatt += ADCValue;
+  }  
+  uint32_t BatVolmV = esp_adc_cal_raw_to_voltage((uint16_t)(ADCValue/10), adc_chars);
   volt = float(BatVolmV) * 25.1 / 5.1 / 1000;
   free(adc_chars);
 
 #elif defined MakerBadge_revB
-  volt = (BATT_V_CAL_SCALE * 2.0 * (2.50 * analogRead(vBatPin) / 8192));
+  for(uint8_t i=0; i<10; i++){
+    Vbatt += analogRead(vBatPin); 
+  }
+  volt = (BATT_V_CAL_SCALE * 2.0 * (2.50 * Vbatt  / 81920));
 
 #elif defined MakerBadge_revD
   // Borrowed from @Yourigh
@@ -482,19 +509,33 @@ float getBatteryVoltage()
   // can be read right after High->Low transition of IO_BAT_meas_disable
   // Here, pin should not go LOW, so intentionally digitalWrite called as first.
   // First write output register (PORTx) then activate output direction (DDRx). Pin will go from highZ(sleep) to HIGH without LOW pulse.
-  digitalWrite(IO_BAT_meas_disable, HIGH);
-  pinMode(IO_BAT_meas_disable, OUTPUT);
+  digitalWrite(enableBattery, HIGH);
+  pinMode(enableBattery, OUTPUT);
 
-  digitalWrite(IO_BAT_meas_disable, LOW);
+  digitalWrite(enableBattery, LOW);
   delayMicroseconds(150);
-  volt = (BATT_V_CAL_SCALE * 2.0 * (2.50 * analogRead(vBatPin) / 8192));
-  digitalWrite(IO_BAT_meas_disable, HIGH);
+  for(uint8_t i=0; i<10; i++){
+    Vbatt += analogRead(vBatPin); 
+  }
+  volt = (BATT_V_CAL_SCALE * 2.0 * (2.50 * Vbatt / 81920));
+  digitalWrite(enableBattery, HIGH);
+
+#elif defined TTGO_T5_v23
+  esp_adc_cal_characteristics_t adc_chars;
+  esp_adc_cal_value_t val_type = esp_adc_cal_characterize((adc_unit_t)ADC_UNIT_1, (adc_atten_t)ADC_ATTEN_DB_2_5, (adc_bits_width_t)ADC_WIDTH_BIT_12, 1100, &adc_chars);
+  for(uint8_t i=0; i<10; i++){
+    Vbatt += (float) analogRead(vBatPin);
+  }  
+  volt = (float)(Vbatt / 40950.0) * 7.05;
 
 #else
   // attach ADC input
   adc.attach(vBatPin);
-  // battery voltage measurement
-  volt = (float)(adc.readVoltage() * dividerRatio);
+  // battery voltage measurement with average correction
+  for(uint8_t i=0; i<10; i++){
+    Vbatt += adc.readVoltage();
+  }
+  volt = (float)((Vbatt / 10) * dividerRatio);
 #endif
 
   Serial.println("Battery voltage: " + String(volt) + " V");
@@ -816,11 +857,11 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
                "Host: " + host + "\r\n" +
                "X-Develop-Version: @pklosko\r\n" +
                "Connection: " + (checkTimestamp ? "keep-alive" : "close") + "\r\n\r\n"); // Keep-alive for 1st request
+
   Serial.println("request sent");
 
   // Workaroud for timeout
   uint32_t timeout = millis();
-
   while (client.available() == 0)
   {
     if (millis() - timeout > 10000)
@@ -918,68 +959,77 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
   return true;
 }
 
-int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres){
+#ifdef SENSOR
+int readSensorsVal(float &sen_temp, int &sen_humi, int &sen_pres)
+{
   Wire.begin();
-  Wire.beginTransmission (0);
-//  int error = Wire.endTransmission();
-  if (Wire.endTransmission()){
-    Serial.println("NO SENSOR FOUND");        
+  Wire.beginTransmission(0);
+
+  if (Wire.endTransmission())
+  {
+    Serial.println("No sensor found.");
     return 0;
   }
-  
-  // Check SHT40 OR SHT41 OR SHT45
-  if (sht4.begin()){
+
+  // Check for SHT40 OR SHT41 OR SHT45
+  if (sht4.begin())
+  {
     Serial.println("SHT4x FOUND");
     sht4.setPrecision(SHT4X_LOW_PRECISION);
     sht4.setHeater(SHT4X_NO_HEATER);
+
     sensors_event_t hum, temp;
     sht4.getEvent(&hum, &temp);
+
     sen_temp = temp.temperature;
-    sen_humi  = hum.relative_humidity;
+    sen_humi = hum.relative_humidity;
     return 1;
   }
 
-  // Check BME280
-  if (bme.begin()){
+  // Check for BME280
+  if (bme.begin())
+  {
     Serial.println("BME280 FOUND");
+
     sen_temp = bme.readTemperature();
     sen_humi = bme.readHumidity();
     sen_pres = bme.readPressure() / 100.0F;
     return 2;
   }
 
-  // Check SCD40 OR SCD41
-  if (SCD4.begin(false, true, false)){
+  // Check for SCD40 OR SCD41
+  if (SCD4.begin(false, true, false))
+  {
     Serial.println("SCD4x FOUND");
     SCD4.measureSingleShot();
+
     while (SCD4.readMeasurement() == false) // wait for a new data (approx 30s)
     {
       Serial.println("Waiting for first measurement...");
       delay(1000);
     }
+
     sen_temp = SCD4.getTemperature();
     sen_humi = SCD4.getHumidity();
     sen_pres = SCD4.getCO2();
     return 3;
   }
-  // No sensor found
-  Serial.println("NO SENSORS FOUND");
+
   return 0;
 }
+#endif
 
-bool checkForNewTimestampOnServer()
+bool checkForNewTimestampOnServer(WiFiClient &client)
 {
-  // Connect to the HOST and read data via GET method
-//  WiFiClient client; // Use WiFiClient class to create TCP connections
   bool connection_ok = false;
   String extraParams = "";
 
   // Measuring temperature and humidity?
 #ifdef SENSOR
   #ifdef ESPink
-    // LaskaKit ESPInk 2.5 needs to power up uSup
-    setEPaperPowerOn(true);
-    delay(50);
+  // LaskaKit ESPInk 2.5 needs to power up uSup
+  setEPaperPowerOn(true);
+  delay(50);
   #endif
 
   float temperature;
@@ -987,29 +1037,32 @@ bool checkForNewTimestampOnServer()
   int pressure;
   uint8_t sen_ret = readSensorsVal(temperature, humidity, pressure);
 
-  if (sen_ret){
+  if (sen_ret)
+  {
     extraParams = "&temp=" + String(temperature) + "&hum=" + String(humidity);
-    switch(sen_ret){
-      case 2 : extraParams += "&pres=" + String(pressure); // BME280
-               break;
-      case 3 : extraParams += "&co2=" + String(pressure); // SCD4x
-               break;
+
+    switch (sen_ret)
+    {
+      case 2:
+        extraParams += "&pres=" + String(pressure); // BME280
+        break;
+      case 3:
+        extraParams += "&co2=" + String(pressure); // SCD4x
+        break;
     }
   }
+
   #ifdef ESPink
   // Power down for now
-    setEPaperPowerOn(false);
+  setEPaperPowerOn(false);
   #endif
 #endif
 
   return createHttpRequest(client, connection_ok, true, extraParams);
 }
 
-void readBitmapData()
+void readBitmapData(WiFiClient &client)
 {
-  // Connect to the HOST and read data via GET method
-//  WiFiClient client; // Use WiFiClient class to create TCP connections
-
   // Let's read bitmap
   static const uint16_t input_buffer_pixels = 800; // may affect performance
   static const uint16_t max_row_width = 1872; // for up to 7.8" display 1872x1404
@@ -1017,7 +1070,7 @@ void readBitmapData()
 
   int16_t x = display.width() - DISPLAY_RESOLUTION_X;
   int16_t y = display.height() - DISPLAY_RESOLUTION_Y;
-  
+
   uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
   uint8_t output_row_mono_buffer[max_row_width / 8]; // buffer for at least one row of b/w bits
   uint8_t output_row_color_buffer[max_row_width / 8]; // buffer for at least one row of color bits
@@ -1449,8 +1502,8 @@ void setup()
   // can be read right after High->Low transition of enableBattery
   // Here, pin should not go LOW, so intentionally digitalWrite called as first.
   // First write output register (PORTx) then activate output direction (DDRx). Pin will go from highZ(sleep) to HIGH without LOW pulse.
-  digitalWrite(enableBattery, HIGH); 
-  pinMode(enableBattery, OUTPUT); 
+  digitalWrite(enableBattery, HIGH);
+  pinMode(enableBattery, OUTPUT);
 #endif
 
 #ifdef M5StackCoreInk
@@ -1480,8 +1533,11 @@ void setup()
   // WiFi SSID - get connected ssid
   ssid = getWifiSSID();
 
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+
   // Do we need to update the screen?
-  if (checkForNewTimestampOnServer())
+  if (checkForNewTimestampOnServer(client))
   {
     // Enable power supply for ePaper
     setEPaperPowerOn(true);
@@ -1493,8 +1549,9 @@ void setup()
     // requests and downloads of one bitmap from server, since you have to always write whole image
     display.setFullWindow();
     display.firstPage();
-    do{
-      readBitmapData();
+    do
+    {
+      readBitmapData(client);
     } while (display.nextPage());
 
     delay(100);
@@ -1509,7 +1566,7 @@ void setup()
 #ifdef M5StackCoreInk
   display.powerOff();
   M5.shutdown(deepSleepTime * 60);
-#else  
+#else
   esp_sleep_enable_timer_wakeup(deepSleepTime * 60 * 1000000);
   delay(100);
   esp_deep_sleep_start();
