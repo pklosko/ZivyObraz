@@ -1565,9 +1565,9 @@ void setup()
 
 #ifdef M5StackCoreInk
   display.powerOff();
-  M5.shutdown(deepSleepTime * 60);
+  M5.shutdown((deepSleepTime * 60)-(uint32_t)(millis()/1000));
 #else
-  esp_sleep_enable_timer_wakeup(deepSleepTime * 60 * 1000000);
+  esp_sleep_enable_timer_wakeup((deepSleepTime * 60 * 1000000)-micros());
   delay(100);
   esp_deep_sleep_start();
 #endif
