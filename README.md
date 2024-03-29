@@ -6,8 +6,14 @@
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
-:calendar: 20240221
-* Sync /w @MultiTricker code. Add AVERAGE to getBatteryVoltage [tested on ESPink only!!!]
+:calendar: 20240429
+*Fix GxEPD2_4G library path for GRAYSCALE displays
+
+:calendar: 20240229
+* UptimeDelay compens correction
+* :memo: access.log
+```
+```
  
 :calendar: 20240226
 * Deep Sleep period - uptime delay compensation [tested on ESPink only!!!]
@@ -26,3 +32,7 @@
 127.0.0.1 - - [26/Feb/2024:23:02:09 +0100] "GET ..tempV=20.99&humV=68&rssi=-56&v=4.04 HTTP/1.1" 200 194
 
 ```
+
+:calendar: 20240221
+* Sync /w @MultiTricker code. Add AVERAGE to getBatteryVoltage [tested on ESPink only!!!]
+

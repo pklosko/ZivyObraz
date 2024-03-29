@@ -49,9 +49,9 @@
 //////////////////////////////////////////////////////////////
 
 //#define TYPE_BW // black and white
-#define TYPE_3C // 3 colors - black, white and red/yellow
+////#define TYPE_3C // 3 colors - black, white and red/yellow
 //#define TYPE_4C // 4 colors - black, white, red and yellow
-//#define TYPE_GRAYSCALE // grayscale - 4 colors
+#define TYPE_GRAYSCALE // grayscale - 4 colors
 //#define TYPE_7C // 7 colors
 
 //////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@
 
 // Grayscale
 //#define D_GDEW042T2_G   // 400x300, 4.2"
-//#define D_GDEY075T7     // 800x480, 7.5"
+#define D_GDEY075T7     // 800x480, 7.5"
 
 // 3C
 //#define D_GDEY0154Z90   // 200x200, 1.54"
@@ -82,7 +82,7 @@
 //#define D_GDEQ042Z21    // 400x300, 4.2"
 //#define D_HINK_E075A01  // 640x384, 7.5"
 //#define D_GDEQ0583Z31   // 648x480, 5.83"
-#define D_GDEY075Z08    // 800x480, 7.5"
+////#define D_GDEY075Z08    // 800x480, 7.5"
 //#define D_GDEH075Z90    // 880x528, 7.5"
 
 // 4C
@@ -194,8 +194,8 @@ static const char *defined_color_type = "4C";
 
 // 4 colors (Grayscale - Black, Darkgrey, Lightgrey, White) (https://github.com/ZinggJM/GxEPD2_4G)
 #elif defined TYPE_GRAYSCALE
-  #include "../lib/GxEPD2_4G/src/GxEPD2_4G_4G.h"
-  #include "../lib/GxEPD2_4G/src/GxEPD2_4G_BW.h"
+  #include <GxEPD2_4G_4G.h>
+  #include <GxEPD2_4G_BW.h>
 static const char *defined_color_type = "4G";
 
 // 7 colors
@@ -219,7 +219,7 @@ static const char *defined_color_type = "7C";
 GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(GxEPD2_213_BN(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEY0213B74 - BW, 128x250px, 2.13"
-#elif D_GDEY0213B74
+#elif defined D_GDEY0213B74
 GxEPD2_BW<GxEPD2_213_GDEY0213B74, GxEPD2_213_GDEY0213B74::HEIGHT> display(GxEPD2_213_GDEY0213B74(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEW0154T8 - BW, 152x152px, 1.54"
@@ -1496,7 +1496,6 @@ void readBitmapData(WiFiClient &client)
 void setup()
 {
   Serial.begin(115200);
-
 #ifdef ES3ink
   // Battery voltage reading via PMOS switch with series capacitor to gate.
   // can be read right after High->Low transition of enableBattery
@@ -1536,6 +1535,8 @@ void setup()
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
 
+  uint32_t startTS = micros();
+
   // Do we need to update the screen?
   if (checkForNewTimestampOnServer(client))
   {
@@ -1567,7 +1568,7 @@ void setup()
   display.powerOff();
   M5.shutdown((deepSleepTime * 60)-(uint32_t)(millis()/1000));
 #else
-  esp_sleep_enable_timer_wakeup((deepSleepTime * 60 * 1000000)-micros());
+  esp_sleep_enable_timer_wakeup((deepSleepTime * 60 * 1000000)-(micros()-startTS));
   delay(100);
   esp_deep_sleep_start();
 #endif
