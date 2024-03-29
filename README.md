@@ -7,7 +7,7 @@
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
 :calendar: 20240429
-*Fix GxEPD2_4G library path for GRAYSCALE displays
+* Fix GxEPD2_4G library path for GRAYSCALE displays
 
 :calendar: 20240229
 * UptimeDelay compens correction
