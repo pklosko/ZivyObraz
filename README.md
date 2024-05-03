@@ -6,6 +6,10 @@
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
+:calendar: 20240503
+* Add LOW_BATT mode
+ 
+
 :calendar: 20240429
 * Fix GxEPD2_4G library path for GRAYSCALE displays
 

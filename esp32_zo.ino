@@ -45,6 +45,21 @@
 #define SENSOR
 
 //////////////////////////////////////////////////////////////
+// Uncomment to enable Low Batt Power scheme
+// Sleeping period is hardcocde to 2 hours whel Batt Voltage is lower then 2.8V
+//////////////////////////////////////////////////////////////
+
+#define LOW_BATT
+
+//////////////////////////////////////////////////////////////
+// Sleeping period is hardcocde to 2 hours when Batt Voltage is lower then 2.75V
+//////////////////////////////////////////////////////////////
+#ifdef LOW_BATT
+  #define LOW_BATT_THR  3.75
+  #define LOW_BATT_SLEEP  180U
+#endif
+
+//////////////////////////////////////////////////////////////
 // Uncomment correct color capability of your ePaper display
 //////////////////////////////////////////////////////////////
 
@@ -1560,9 +1575,16 @@ void setup()
     setEPaperPowerOn(false);
   }
 
+#ifdef LOW_BATT
+  if ( d_volt < LOW_BATT_THR){
+    deepSleepTime = LOW_BATT_SLEEP;
+  }
+#endif
+
   // Deep sleep mode
   Serial.print("Going to sleep now for (minutes): ");
   Serial.println(deepSleepTime);
+
 
 #ifdef M5StackCoreInk
   display.powerOff();
