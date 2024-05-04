@@ -57,11 +57,11 @@
 // - Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR
 //////////////////////////////////////////////////////////////
 #ifdef POWER_SAVE
-  #define PWR_SAVE_THR  3.80             // Production value = 3.55 [3.8 for TESTING ONLY] !!!
+  #define PWR_SAVE_THR  3.55             // Production value = 3.55 [3.8 for TESTING ONLY] !!!
   #define LOW_BATT_SLEEP  240U
   const char LowBatt[] = " ! Battery LOW ! ";
   const char PwrSave[] = " ! Power SAVE ! ";
-  float lowBattThreshold = 3.85;         // Production value = 3.60 [3.85 for TESTING ONLY] !!!
+  float lowBattThreshold = 3.60;         // Production value = 3.60 [3.85 for TESTING ONLY] !!!
                                          // default Low Batt Threshold, value is changed
                                          // by what server suggest in response headers
 #endif
