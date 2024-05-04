@@ -1,15 +1,25 @@
-# :rabbit: ZivyObraz
+# :sleeping: ZivyObraz
 :hammer: Develop & TEST FORK
 
 ## :warning: No Warranty :warning:
-### Tested ONLY on ESPink unless otherwise stated !!!
+### Tested ONLY on (unless otherwise stated) !!!
+### * ESPink
+### * D_GDEY075T7     // 800x480, 7.5"
+### and/or
+### * D_GDEY075Z08    // 800x480, 7.5"
+
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
+
+:calendar: 20240504
+* Add LOW_BATT & POWER SAVE Info to the display
+* Add POWER SAVE functions
+* Test still running :hourglass_flowing_sand:
+* TODO [by @MultiTricker] : lowBattThreshold value is changed by what server suggest in response headers
 
 :calendar: 20240503
 * Add LOW_BATT mode
  
-
 :calendar: 20240429
 * Fix GxEPD2_4G library path for GRAYSCALE displays
 

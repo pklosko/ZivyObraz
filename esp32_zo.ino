@@ -45,18 +45,25 @@
 #define SENSOR
 
 //////////////////////////////////////////////////////////////
-// Uncomment to enable Low Batt Power scheme
-// Sleeping period is hardcocde to 2 hours whel Batt Voltage is lower then 2.8V
+// Uncomment to enable Low Batt & Power Saving scheme
+// See details below
 //////////////////////////////////////////////////////////////
 
-#define LOW_BATT
+#define POWER_SAVE
 
 //////////////////////////////////////////////////////////////
-// Sleeping period is hardcocde to 2 hours when Batt Voltage is lower then 2.75V
+// Power saving functions
+// - Sleeping period is hardcocde to 4 hours when Batt Voltage is lower then lowBattThreshold
+// - Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR
 //////////////////////////////////////////////////////////////
-#ifdef LOW_BATT
-  #define LOW_BATT_THR  3.75
-  #define LOW_BATT_SLEEP  180U
+#ifdef POWER_SAVE
+  #define PWR_SAVE_THR  3.80             // Production value = 3.55 [3.8 for TESTING ONLY] !!!
+  #define LOW_BATT_SLEEP  240U
+  const char LowBatt[] = " ! Battery LOW ! ";
+  const char PwrSave[] = " ! Power SAVE ! ";
+  float lowBattThreshold = 3.85;         // Production value = 3.60 [3.85 for TESTING ONLY] !!!
+                                         // default Low Batt Threshold, value is changed
+                                         // by what server suggest in response headers
 #endif
 
 //////////////////////////////////////////////////////////////
@@ -430,6 +437,7 @@ uint64_t defaultDeepSleepTime = 2; // if there is a problem with loading images,
                                    // this time will be used as fallback to try again soon
 uint64_t deepSleepTime = defaultDeepSleepTime; // actual sleep time in minutes, value is changed
                                                // by what server suggest in response headers
+
 /* ---------------------------------------------- */
 
 /*-------------- ePaper resolution -------------- */
@@ -557,6 +565,45 @@ float getBatteryVoltage()
 
   return volt;
 }
+
+#ifdef POWER_SAVE
+void drawLowBattInfo(bool powerSave = false){
+  int16_t tbx, tby; uint16_t tbw, tbh;
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&OpenSansSB_24px);
+  if (powerSave) {
+    display.getTextBounds(PwrSave, 0, 0, &tbx, &tby, &tbw, &tbh);    
+    Serial.println(PwrSave);
+  }else{
+    display.getTextBounds(LowBatt, 0, 0, &tbx, &tby, &tbw, &tbh);   
+    Serial.println(LowBatt); 
+  }
+  uint16_t x = ((display.width() - tbw) / 2) - tbx;
+  uint16_t y = ((display.height() / 4) - tbh / 2) - tby; // y is base line!
+  uint16_t wh = OpenSansSB_24px.yAdvance;
+  uint16_t wy = (display.height() / 4) - wh / 2;
+  if (display.epd2.hasPartialUpdate || display.epd2.hasFastPartialUpdate){
+    Serial.print("Partial MODE available");
+    display.setPartialWindow(0, wy, display.width(), wh);
+  }else{
+    display.setFullWindow(); 
+  }
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_BLACK);
+    display.drawRect(x, y - tbh, tbw, tbh, display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
+    display.setCursor(x, y);
+    if (powerSave) {    
+      display.print(LowBatt);
+    }else{
+      display.print(PwrSave);        
+    }
+  }
+  while (display.nextPage());
+}
+
+#endif
 
 void drawQrCode(const char *qrStr, int qrSize, int yCord, int xCord, byte qrSizeMulti = 1)
 {
@@ -841,6 +888,7 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
                "&rssi=" + String(rssi) +
                "&ssid=" + ssid +
                "&v=" + String(d_volt) +
+               "&bt=" + String(lowBattThreshold) +
                "&x=" + String(DISPLAY_RESOLUTION_X) +
                "&y=" + String(DISPLAY_RESOLUTION_Y) +
                "&c=" + String(defined_color_type) +
@@ -916,6 +964,14 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
         Serial.println(sleep);
       }
 
+      if (line.startsWith("LowBatt"))
+      {
+        float battTHR = line.substring(8).toFloat();
+        lowBattThreshold = battTHR;
+        Serial.print("LowBatt: ");
+        Serial.println(battTHR);
+      }
+      
       // Do we want to rotate display? (IE. upside down)
       if (line.startsWith("Rotate"))
       {
@@ -1546,7 +1602,7 @@ void setup()
 
   // WiFi SSID - get connected ssid
   ssid = getWifiSSID();
-
+  
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
 
@@ -1575,9 +1631,14 @@ void setup()
     setEPaperPowerOn(false);
   }
 
-#ifdef LOW_BATT
-  if ( d_volt < LOW_BATT_THR){
+#ifdef POWER_SAVE
+  if ( d_volt <= lowBattThreshold){
     deepSleepTime = LOW_BATT_SLEEP;
+    setEPaperPowerOn(true);
+    delay(500);
+    drawLowBattInfo((d_volt <= PWR_SAVE_THR));
+    setEPaperPowerOn(false);
+    delay(100);
   }
 #endif
 
@@ -1591,6 +1652,11 @@ void setup()
   M5.shutdown((deepSleepTime * 60)-(uint32_t)(millis()/1000));
 #else
   esp_sleep_enable_timer_wakeup((deepSleepTime * 60 * 1000000)-(micros()-startTS));
+  #ifdef POWER_SAVE  
+    if (d_volt <= PWR_SAVE_THR){
+      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    }
+  #endif
   delay(100);
   esp_deep_sleep_start();
 #endif
