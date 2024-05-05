@@ -11,6 +11,10 @@
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
+:calendar: 20240505
+* Remove POWER_SAVE / No WakeUp functions due to incompatibility /w pixla od LaskaKit
+* 
+
 :calendar: 20240504
 * Add LOW_BATT & POWER SAVE Info to the display
 * Add POWER SAVE functions
