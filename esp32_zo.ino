@@ -50,17 +50,27 @@
 //////////////////////////////////////////////////////////////
 
 #define LOW_BATT
+#define POWER_SAVE
 
 //////////////////////////////////////////////////////////////
 // Power saving functions
 // - Sleeping period is hardcocde to 4 hours when Batt Voltage is lower then lowBattThreshold
-// - Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR
+// - Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR if POWER_SAVE defined - incomparibile /w LaskaKit housing - No RESET button included !!!
 //////////////////////////////////////////////////////////////
+#ifdef POWER_SAVE
+  #ifndef LOW_BATT
+    #define LOW_BATT 
+  #endif
+  #define PWR_SAVE_THR  3.55             // Production value = 3.55 [3.8 for TESTING ONLY] !!!
+  const char PwrSave[] = " ! Power SAVE ! ";
+#endif
+
 #ifdef LOW_BATT
   #define LOW_BATT_SLEEP  240U
   const char LowBatt[] = " ! Battery LOW ! ";
 #endif
 
+  
 //////////////////////////////////////////////////////////////
 // Uncomment correct color capability of your ePaper display
 //////////////////////////////////////////////////////////////
@@ -566,12 +576,18 @@ float getBatteryVoltage()
 }
 
 #ifdef LOW_BATT
-void drawLowBattInfo(){
+void drawLowBattInfo(bool powerSave = false){
   int16_t tbx, tby; uint16_t tbw, tbh;
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&OpenSansSB_24px);
-  display.getTextBounds(LowBatt, 0, 0, &tbx, &tby, &tbw, &tbh);   
+  display.getTextBounds(LowBatt, 0, 0, &tbx, &tby, &tbw, &tbh);
   Serial.println(LowBatt); 
+  #ifdef POWER_SAVE
+  if (powerSave) {
+    display.getTextBounds(PwrSave, 0, 0, &tbx, &tby, &tbw, &tbh);    
+    Serial.println(PwrSave);
+  }  
+  #endif   
   uint16_t x = ((display.width() - tbw) / 2) - tbx;
   uint16_t y = ((display.height() / 4) - tbh / 2) - tby; // y is base line!
   uint16_t wh = OpenSansSB_24px.yAdvance;
@@ -588,7 +604,15 @@ void drawLowBattInfo(){
     display.fillScreen(GxEPD_BLACK);
     display.drawRect(x, y - tbh, tbw, tbh, display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
     display.setCursor(x, y);
-    display.print(LowBatt);        
+    #ifdef POWER_SAVE
+    if (powerSave) {    
+      display.print(LowBatt);
+    }else{
+      display.print(PwrSave);        
+    }
+    #else
+      display.print(LowBatt);
+    #endif        
   }
   while (display.nextPage());
 }
@@ -1628,7 +1652,11 @@ void setup()
     }
     setEPaperPowerOn(true);
     delay(500);
-    drawLowBattInfo();
+    #ifdef POWER_SAVE
+      drawLowBattInfo((d_volt <= PWR_SAVE_THR));
+    #else
+      drawLowBattInfo(false);
+    #endif
     setEPaperPowerOn(false);
     delay(100);
   }
@@ -1645,6 +1673,11 @@ void setup()
 #else
   esp_sleep_enable_timer_wakeup((deepSleepTime * 60 * 1000000)-(micros()-startTS));
   delay(100);
+  #ifdef POWER_SAVE  
+    if (d_volt <= PWR_SAVE_THR){
+      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    }
+  #endif
   esp_deep_sleep_start();
 #endif
 }
