@@ -12,7 +12,7 @@
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
 :calendar: 20240510
-* Add POWER_SAVE as a sepparate option
+* Add POWER_SAVE as a separate option
 
 
 :calendar: 20240505

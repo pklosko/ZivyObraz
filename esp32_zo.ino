@@ -54,8 +54,8 @@
 
 //////////////////////////////////////////////////////////////
 // Power saving functions
-// - Sleeping period is hardcocde to 4 hours when Batt Voltage is lower then lowBattThreshold
-// - Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR if POWER_SAVE defined - incomparibile /w LaskaKit housing - No RESET button included !!!
+// - LOW_BATT:   Sleeping period is hardcocde to 4 hours when Batt Voltage is lower then lowBattThreshold
+// - POWER_SAVE: Do not wake up from deep sleep when Batt Voltage is lower than PWR_SAVE_THR if POWER_SAVE defined - incompatbile /w @LaskaKit housing - No RESET button included !!!
 //////////////////////////////////////////////////////////////
 #ifdef POWER_SAVE
   #ifndef LOW_BATT
