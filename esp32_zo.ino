@@ -898,7 +898,7 @@ uint32_t read32(WiFiClient &client)
 bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp, const String &extraParams)
 {
   // Make an url
-//  String url = "index.php?mac=08:d1:f9:db:cb:2c&orig_mac=" + WiFi.macAddress() +
+
   String url = "index.php?mac=" + WiFi.macAddress() +
                (checkTimestamp ? "&timestamp_check=1" : "") +
                "&rssi=" + String(rssi) +
