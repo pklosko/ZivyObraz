@@ -299,7 +299,8 @@ GxEPD2_4G_4G<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(PIN_SS, PIN_DC, 
 
 // GDEY075T7 - Grayscale, 800x480px, 7.5"
 #elif defined D_GDEY075T7
-GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+GxEPD2_4G_4G<GxEPD2_750_GDEY075T7, GxEPD2_750_GDEY075T7::HEIGHT / 2> display(GxEPD2_750_GDEY075T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+//GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 ///////////////////////
 // 3C
@@ -309,7 +310,7 @@ GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(PIN
 #elif defined D_GDEY0154Z90
 GxEPD2_3C<GxEPD2_154_Z90c, GxEPD2_154_Z90c::HEIGHT> display(GxEPD2_154_Z90c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
-// WS42YBW400300 - 3C, 400x300px, 4.2"
+// WS42YBW400300 - 3C, 400x300px, 4.2"GxEPD2_4G_4G
 #elif defined D_WS42YBW400300
 GxEPD2_3C<GxEPD2_420c, GxEPD2_420c::HEIGHT> display(GxEPD2_420c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
@@ -897,6 +898,7 @@ uint32_t read32(WiFiClient &client)
 bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp, const String &extraParams)
 {
   // Make an url
+//  String url = "index.php?mac=08:d1:f9:db:cb:2c&orig_mac=" + WiFi.macAddress() +
   String url = "index.php?mac=" + WiFi.macAddress() +
                (checkTimestamp ? "&timestamp_check=1" : "") +
                "&rssi=" + String(rssi) +

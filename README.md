@@ -1,4 +1,4 @@
-# :sleeping: ZivyObraz
+# :white_square_button: ZivyObraz
 :hammer: Develop & TEST FORK
 
 ## :warning: No Warranty :warning:
@@ -10,6 +10,9 @@
 
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
+
+:calendar: 20241020
+* Add native support for GDEY075T7 Greyscale display via GxEPD2_4G v.1.0.8
 
 :calendar: 20240510
 * Add POWER_SAVE as a separate option
