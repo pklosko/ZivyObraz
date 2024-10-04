@@ -30,7 +30,9 @@
 // Uncomment for correct board
 /////////////////////////////////
 
-#define ESPink
+#define ESPink_V2
+//#define ESPink_V3
+//#define ESP32S3Adapter
 //#define ES3ink
 //#define MakerBadge_revB // also works with A and C
 //#define MakerBadge_revD
@@ -76,7 +78,7 @@
 //////////////////////////////////////////////////////////////
 
 //#define TYPE_BW // black and white
-////#define TYPE_3C // 3 colors - black, white and red/yellow
+//#define TYPE_3C // 3 colors - black, white and red/yellow
 //#define TYPE_4C // 4 colors - black, white, red and yellow
 #define TYPE_GRAYSCALE // grayscale - 4 colors
 //#define TYPE_7C // 7 colors
@@ -86,38 +88,56 @@
 //////////////////////////////////////////////////////////////
 
 // BW
-//#define D_DEPG0213BN    // 122x250, 2.13" (TTGO T5_V2.3_2.13)
-//#define D_GDEY0213B74   // 128x250, 2.13"
 //#define D_GDEW0154T8    // 152x152, 1.54"
 //#define D_GDEY027T91    // 176x264, 2.7"
-//#define D_GDEY0154D67   // 200x200, 1.54"
+//#define D_GDEY029T94    // 128x296, 2.9"
+//#define D_GDEY029T71H   // 168x384, 2.9"
 //#define D_GDEQ031T10    // 240x320, 3.1"
 //#define D_GDEQ042T81    // 400x300, 4.2"
+//#define D_GDEY0579T93   // 792x272, 5.79"
 //#define D_GDEQ0583T31   // 648x480, 5.83"
-//#define D_GDEQ0426T82   // 800x480, 4.26"
 //#define D_WS75BWT7      // 800x480, 7.5"
 //#define D_GDEW075T7     // 800x480, 7.5"
-//#define D_GDEQ102T90    // 960x640, 10.2"
+//#define D_GDEY075T7BW   // 800x480, 7.5"
+//#define D_GDEM102T91    // 960x640, 10.2"
+//#define D_GDEM1085T51   // 1360x480, 10.85"
+//#define D_GDEM133T91    // 960x680, 13.3"
 
 // Grayscale
+//#define D_GDEY0154D67   // 200x200, 1.54"
+//#define D_GDEY0213B74   // 128x250, 2.13"
 //#define D_GDEW042T2_G   // 400x300, 4.2"
+//#define D_GDEY042T81    // 400x300, 4.2"
+//#define D_GDEQ0426T82   // 800x480, 4.26"
 #define D_GDEY075T7     // 800x480, 7.5"
 
 // 3C
 //#define D_GDEY0154Z90   // 200x200, 1.54"
 //#define D_WS42YBW400300 // 400x300, 4.2"
 //#define D_GDEQ042Z21    // 400x300, 4.2"
+//#define D_GDEY042Z98    // 400x300, 4.2"
 //#define D_HINK_E075A01  // 640x384, 7.5"
+//#define D_GDEY0579Z93   // 792x272, 5.79"
 //#define D_GDEQ0583Z31   // 648x480, 5.83"
-////#define D_GDEY075Z08    // 800x480, 7.5"
+//#define D_GDEY075Z08    // 800x480, 7.5"
 //#define D_GDEH075Z90    // 880x528, 7.5"
+//#define D_GDEY116Z91    // 960x640, 11.6"
+//#define D_GDEM133Z91    // 960x680, 13.3"
 
 // 4C
+//#define D_GDEY0213F51   // 128x250, 2.13"
+//#define D_GDEY0266F51H  // 184x460, 2.66"
+//#define D_GDEY029F51H   // 168x384, 2.9"
+//#define D_WS3004YRBW    // 168x400, 3.00"
+//#define D_GDEY0420F51   // 400x300, 4.2"
 //#define D_WS437YRBW     // 512x368, 4.37"
+//#define D_GDEY0579F51   // 792x272, 5.79"
+//#define D_GDEY116F51    // 960x640, 11.6"
 
 // 7C
 //#define D_GDEP0565D90   // 600x448, 5.65"
 //#define D_GDEY073D46    // 800x480, 7.3"
+//#define D_GDEP073E01    // 800x480, 7.3"
 
 // ...
 // More supported display classes in GxEPD2 can be found example here:
@@ -136,53 +156,74 @@
 // https://www.laskakit.cz/laskakit-espink-esp32-e-paper-pcb-antenna/?variantId=12419
 // + LaskaKit ESPInk-42 all-in-one board
 
-#ifdef ESPink
-  #define PIN_SS 5   // SS
-  #define PIN_DC 17  // D/C
-  #define PIN_RST 16 // RES
-  #define PIN_BUSY 4 // PIN_BUSY
+#ifdef ESPink_V2
+  #define PIN_SS 5
+  #define PIN_DC 17
+  #define PIN_RST 16
+  #define PIN_BUSY 4
   #define ePaperPowerPin 2
+
+#elif defined ESPink_V3
+  #define PIN_SS 10
+  #define PIN_DC 48
+  #define PIN_RST 45
+  #define PIN_BUSY 36
+  #define PIN_CS2 35
+  #define ePaperPowerPin 47
+
+#elif defined ESP32S3Adapter
+  #define PIN_SS 10
+  #define PIN_DC 41
+  #define PIN_RST 40
+  #define PIN_BUSY 13
+  #define ePaperPowerPin 47
+  #define enableBattery 40
+  #define PIN_SPI_CLK 12
+  #define PIN_SPI_MOSI 11
+
+  #include <esp_adc_cal.h>
+  #include <soc/adc_channel.h>
 
 #elif defined ES3ink
   // for version P1.1
-  #define PIN_SS 10  // SS
-  #define PIN_DC 7   // D/C
-  #define PIN_RST 5  // RES
-  #define PIN_BUSY 6 // PIN_BUSY
+  #define PIN_SS 10
+  #define PIN_DC 7
+  #define PIN_RST 5
+  #define PIN_BUSY 6
   #define ePaperPowerPin 3
   #define enableBattery 40
+  #define RGBledPin 48
+  #define RGBledPowerPin 14
 
   #include <esp_adc_cal.h>
   #include <soc/adc_channel.h>
 
 #elif defined MakerBadge_revB
-  #define PIN_SS 41   // SS
-  #define PIN_DC 40   // D/C
-  #define PIN_RST 39  // RES
-  #define PIN_BUSY 42 // PIN_BUSY
+  #define PIN_SS 41
+  #define PIN_DC 40
+  #define PIN_RST 39
+  #define PIN_BUSY 42
   #define ePaperPowerPin 16
 
 #elif defined MakerBadge_revD
-  #define PIN_SS 41   // SS
-  #define PIN_DC 40   // D/C
-  #define PIN_RST 39  // RES
-  #define PIN_BUSY 42 // PIN_BUSY
+  #define PIN_SS 41
+  #define PIN_DC 40
+  #define PIN_RST 39
+  #define PIN_BUSY 42
   #define ePaperPowerPin 16
   #define enableBattery 14
 
 #elif defined TTGO_T5_v23
-  #define PIN_SS 5   // SS
-  #define PIN_DC 17  // D/C
-  #define PIN_RST 16 // RES
-  #define PIN_BUSY 4 // PIN_BUSY
+  #define PIN_SS 5
+  #define PIN_DC 17
+  #define PIN_RST 16
+  #define PIN_BUSY 4
   #define ePaperPowerPin 2
-
 
 #else
   #error "Board not defined!"
 #endif
 
-//#define REMAP_SPI
 #ifdef REMAP_SPI
   #define PIN_SPI_CLK 13  // CLK
   #define PIN_SPI_MISO 14 // unused
@@ -206,28 +247,28 @@ PIN_BUSY = GPIO4
 
 // 2 colors (Black and White)
 #ifdef TYPE_BW
-  #include <GxEPD2_BW.h>
+  #include "GxEPD2_BW.h"
 static const char *defined_color_type = "BW";
 
 // 3 colors (Black, White and Red/Yellow)
 #elif defined TYPE_3C
-  #include <GxEPD2_3C.h>
+  #include "GxEPD2_3C.h"
 static const char *defined_color_type = "3C";
 
 // 4 colors (Black, White, Red and Yellow)
 #elif defined TYPE_4C
-  #include <GxEPD2_4C.h>
+  #include "GxEPD2_4C.h"
 static const char *defined_color_type = "4C";
 
 // 4 colors (Grayscale - Black, Darkgrey, Lightgrey, White) (https://github.com/ZinggJM/GxEPD2_4G)
 #elif defined TYPE_GRAYSCALE
-  #include <GxEPD2_4G_4G.h>
-  #include <GxEPD2_4G_BW.h>
+  #include "GxEPD2_4G_4G.h"
+//  #include "GxEPD2_4G_BW.h"
 static const char *defined_color_type = "4G";
 
 // 7 colors
 #elif defined TYPE_7C
-  #include <GxEPD2_7C.h>
+  #include "GxEPD2_7C.h"
 static const char *defined_color_type = "7C";
 #else
   #error "ePaper type not defined!"
@@ -241,25 +282,21 @@ static const char *defined_color_type = "7C";
 // BW
 ///////////////////////
 
-// D_DEPG0213BN - BW, 122x250px, 2.13"
-#ifdef D_DEPG0213BN
-GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(GxEPD2_213_BN(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
-
-// GDEY0213B74 - BW, 128x250px, 2.13"
-#elif defined D_GDEY0213B74
-GxEPD2_BW<GxEPD2_213_GDEY0213B74, GxEPD2_213_GDEY0213B74::HEIGHT> display(GxEPD2_213_GDEY0213B74(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
-
 // GDEW0154T8 - BW, 152x152px, 1.54"
-#elif defined D_GDEW0154T8
+#ifdef D_GDEW0154T8
 GxEPD2_BW<GxEPD2_154_T8, GxEPD2_154_T8::HEIGHT> display(GxEPD2_154_T8(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEY027T91 - BW, 176x264px, 2.7"
 #elif defined D_GDEY027T91
 GxEPD2_BW<GxEPD2_270_GDEY027T91, GxEPD2_270_GDEY027T91::HEIGHT> display(GxEPD2_270_GDEY027T91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
-// GDEY0154D67 - BW, 200x200px, 1.54"
-#elif defined D_GDEY0154D67
-GxEPD2_BW<GxEPD2_154_GDEY0154D67, GxEPD2_154_GDEY0154D67::HEIGHT> display(GxEPD2_154_GDEY0154D67(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+// GDEY029T94 - BW, 128x296px, 2.9"
+#elif defined D_GDEY029T94
+GxEPD2_BW<GxEPD2_290_GDEY029T94, GxEPD2_290_GDEY029T94::HEIGHT> display(GxEPD2_290_GDEY029T94(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY029T71H - BW, 168x384px, 2.9"
+#elif defined D_GDEY029T71H
+GxEPD2_BW<GxEPD2_290_GDEY029T71H, GxEPD2_290_GDEY029T71H::HEIGHT> display(GxEPD2_290_GDEY029T71H(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEQ031T10 - BW, 240x320px, 3.1"
 #elif defined D_GDEQ031T10
@@ -269,13 +306,13 @@ GxEPD2_BW<GxEPD2_310_GDEQ031T10, GxEPD2_310_GDEQ031T10::HEIGHT> display(GxEPD2_3
 #elif defined D_GDEQ042T81
 GxEPD2_BW<GxEPD2_420_GDEY042T81, GxEPD2_420_GDEY042T81::HEIGHT> display(GxEPD2_420_GDEY042T81(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEY0579T93 - BW, 792x272px, 5.79"
+#elif defined D_GDEY0579T93
+GxEPD2_BW<GxEPD2_579_GDEY0579T93, GxEPD2_579_GDEY0579T93::HEIGHT> display(GxEPD2_579_GDEY0579T93(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // GDEQ0583T31 - BW, 648x480px, 5.83"
 #elif defined D_GDEQ0583T31
 GxEPD2_BW<GxEPD2_583_GDEQ0583T31, GxEPD2_583_GDEQ0583T31::HEIGHT> display(GxEPD2_583_GDEQ0583T31(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
-
-// GDEQ0426T82 - BW, 800x480px, 4.26"
-#elif defined D_GDEQ0426T82
-GxEPD2_BW<GxEPD2_426_GDEQ0426T82, GxEPD2_426_GDEQ0426T82::HEIGHT> display(GxEPD2_426_GDEQ0426T82(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // WS75BWT7 - BW, 800x480px, 7.5"
 #elif defined D_WS75BWT7
@@ -285,22 +322,51 @@ GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT> display(GxEPD2_750_T7(PIN_SS, PI
 #elif defined D_GDEW075T7
 GxEPD2_BW<GxEPD2_750, GxEPD2_750::HEIGHT> display(GxEPD2_750(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
-// GDEQ102T90 - BW, 960x640px, 10.2"
-#elif defined D_GDEQ102T90
-GxEPD2_BW<GxEPD2_1160_T91, GxEPD2_1160_T91::HEIGHT / 2> display(GxEPD2_1160_T91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+// GDEY075T7BW - BW, 800x480px, 7.5"
+#elif defined D_GDEY075T7BW
+GxEPD2_BW<GxEPD2_750_GDEY075T7, GxEPD2_750_GDEY075T7::HEIGHT> display(GxEPD2_750_GDEY075T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEM102T91 - BW, 960x640px, 10.2"
+#elif defined D_GDEM102T91
+GxEPD2_BW<GxEPD2_1020_GDEM102T91, GxEPD2_1020_GDEM102T91::HEIGHT / 2> display(GxEPD2_1020_GDEM102T91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEM1085T51 - BW, 1360x480px, 10.85"
+#elif defined D_GDEM1085T51
+GxEPD2_BW<GxEPD2_1085_GDEM1085T51, GxEPD2_1085_GDEM1085T51::HEIGHT / 2> display(GxEPD2_1085_GDEM1085T51(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY, PIN_CS2));
+
+// GDEM133T91 - BW, 960x680px, 13.3"
+#elif defined D_GDEM133T91
+GxEPD2_BW<GxEPD2_1330_GDEM133T91, GxEPD2_1330_GDEM133T91::HEIGHT / 2> display(GxEPD2_1330_GDEM133T91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 ///////////////////////
 // Grayscale
 ///////////////////////
 
+// GDEY0154D67 - Grayscale, 200x200px, 1.54"
+#elif defined D_GDEY0154D67
+GxEPD2_4G_4G<GxEPD2_154_GDEY0154D67, GxEPD2_154_GDEY0154D67::HEIGHT> display(GxEPD2_154_GDEY0154D67(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY0213B74 - Grayscale, 128x250px, 2.13"
+#elif defined D_GDEY0213B74
+GxEPD2_4G_4G<GxEPD2_213_GDEY0213B74, GxEPD2_213_GDEY0213B74::HEIGHT> display(GxEPD2_213_GDEY0213B74(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // GDEW042T2_G - Grayscale, 400x300px, 4.2"
 #elif defined D_GDEW042T2_G
 GxEPD2_4G_4G<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY042T81 - Grayscale, 400x300px, 4.2"
+#elif defined D_GDEY042T81
+GxEPD2_4G_4G<GxEPD2_420_GDEY042T81, GxEPD2_420_GDEY042T81::HEIGHT> display(GxEPD2_420_GDEY042T81(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEQ0426T82 - Grayscale, 800x480px, 4.26"
+#elif defined D_GDEQ0426T82
+GxEPD2_4G_4G<GxEPD2_426_GDEQ0426T82, GxEPD2_426_GDEQ0426T82::HEIGHT / 2> display(GxEPD2_426_GDEQ0426T82(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEY075T7 - Grayscale, 800x480px, 7.5"
 #elif defined D_GDEY075T7
 GxEPD2_4G_4G<GxEPD2_750_GDEY075T7, GxEPD2_750_GDEY075T7::HEIGHT / 2> display(GxEPD2_750_GDEY075T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 //GxEPD2_4G_4G<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT / 2> display(GxEPD2_750_T7(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 
 ///////////////////////
 // 3C
@@ -310,7 +376,7 @@ GxEPD2_4G_4G<GxEPD2_750_GDEY075T7, GxEPD2_750_GDEY075T7::HEIGHT / 2> display(GxE
 #elif defined D_GDEY0154Z90
 GxEPD2_3C<GxEPD2_154_Z90c, GxEPD2_154_Z90c::HEIGHT> display(GxEPD2_154_Z90c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
-// WS42YBW400300 - 3C, 400x300px, 4.2"GxEPD2_4G_4G
+// WS42YBW400300 - 3C, 400x300px, 4.2"
 #elif defined D_WS42YBW400300
 GxEPD2_3C<GxEPD2_420c, GxEPD2_420c::HEIGHT> display(GxEPD2_420c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
@@ -318,13 +384,21 @@ GxEPD2_3C<GxEPD2_420c, GxEPD2_420c::HEIGHT> display(GxEPD2_420c(PIN_SS, PIN_DC, 
 #elif defined D_GDEQ042Z21
 GxEPD2_3C<GxEPD2_420c_Z21, GxEPD2_420c_Z21::HEIGHT> display(GxEPD2_420c_Z21(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEY042Z98 - 3C, 400x300px, 4.2"
+#elif defined D_GDEY042Z98
+GxEPD2_3C<GxEPD2_420c_GDEY042Z98, GxEPD2_420c_GDEY042Z98::HEIGHT> display(GxEPD2_420c_GDEY042Z98(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // HINK_E075A01 - 3C, 640x384px, 7.5"
 #elif defined D_HINK_E075A01
 GxEPD2_3C<GxEPD2_750c, GxEPD2_750c::HEIGHT> display(GxEPD2_750c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEY0579Z93 - 3C, 792x272px, 5.79"
+#elif defined D_GDEY0579Z93
+GxEPD2_3C<GxEPD2_579c_GDEY0579Z93, GxEPD2_579c_GDEY0579Z93::HEIGHT> display(GxEPD2_579c_GDEY0579Z93(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // GDEQ0583Z31 - 3C, 648x480px, 5.83"
 #elif defined D_GDEQ0583Z31
-GxEPD2_3C<GxEPD2_583c_Z83, GxEPD2_583c_Z83::HEIGHT> display(GxEPD2_583c_Z83(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+GxEPD2_3C<GxEPD2_583c_Z83, GxEPD2_583c_Z83::HEIGHT / 2> display(GxEPD2_583c_Z83(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 // GDEY075Z08 - 3C, 800x480px, 7.5"
 #elif defined D_GDEY075Z08
@@ -334,13 +408,49 @@ GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(
 #elif defined D_GDEH075Z90
 GxEPD2_3C<GxEPD2_750c_Z90, GxEPD2_750c_Z90::HEIGHT / 2> display(GxEPD2_750c_Z90(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEY116Z91 - 3C, 960x640px, 11.6"
+#elif defined D_GDEY116Z91
+GxEPD2_3C<GxEPD2_1160c_GDEY116Z91, GxEPD2_1160c_GDEY116Z91::HEIGHT / 4> display(GxEPD2_1160c_GDEY116Z91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEM133Z91 - 3C, 960x680px, 13.3"
+#elif defined D_GDEM133Z91
+GxEPD2_3C<GxEPD2_1330c_GDEM133Z91, GxEPD2_1330c_GDEM133Z91::HEIGHT / 4> display(GxEPD2_1330c_GDEM133Z91(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 ///////////////////////
 // 4C
 ///////////////////////
 
+// GDEY0213F51 - 4C, 128x250px, 2.13"
+#elif defined D_GDEY0213F51
+GxEPD2_4C<GxEPD2_213c_GDEY0213F51, GxEPD2_213c_GDEY0213F51::HEIGHT> display(GxEPD2_213c_GDEY0213F51(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY0266F51H - 4C, 184x460px, 2.66"
+#elif defined D_GDEY0266F51H
+GxEPD2_4C<GxEPD2_266c_GDEY0266F51H, GxEPD2_266c_GDEY0266F51H::HEIGHT> display(GxEPD2_266c_GDEY0266F51H(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY029F51H - 4C, 168x384px, 2.9"
+#elif defined D_GDEY029F51H
+GxEPD2_4C<GxEPD2_290c_GDEY029F51H, GxEPD2_290c_GDEY029F51H::HEIGHT> display(GxEPD2_290c_GDEY029F51H(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// WS3004YRBW - 4C, 168x400px, 3.00"
+#elif defined D_WS3004YRBW
+GxEPD2_4C<GxEPD2_300c, GxEPD2_300c::HEIGHT> display(GxEPD2_300c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY0420F51 - 4C, 400x300px, 4.2"
+#elif defined D_GDEY0420F51
+GxEPD2_4C<GxEPD2_420c_GDEY0420F51, GxEPD2_420c_GDEY0420F51::HEIGHT> display(GxEPD2_420c_GDEY0420F51(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 // WS437YRBW - 4C, 512x368px, 4.37"
 #elif defined D_WS437YRBW
 GxEPD2_4C<GxEPD2_437c, GxEPD2_437c::HEIGHT / 4> display(GxEPD2_437c(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY0579F51 - 4C, 792x272px, 5.79"
+#elif defined D_GDEY0579F51
+GxEPD2_4C<GxEPD2_0579c_GDEY0579F51, GxEPD2_0579c_GDEY0579F51::HEIGHT> display(GxEPD2_0579c_GDEY0579F51(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
+// GDEY116F51 - 4C, 960x640px, 11.6"
+#elif defined D_GDEY116F51
+GxEPD2_4C<GxEPD2_1160c_GDEY116F51, GxEPD2_1160c_GDEY116F51::HEIGHT / 4> display(GxEPD2_1160c_GDEY116F51(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
 ///////////////////////
 // 7C
@@ -354,9 +464,14 @@ GxEPD2_7C<GxEPD2_565c, GxEPD2_565c::HEIGHT / 2> display(GxEPD2_565c(PIN_SS, PIN_
 #elif defined D_GDEY073D46
 GxEPD2_7C<GxEPD2_730c_GDEY073D46, GxEPD2_730c_GDEY073D46::HEIGHT / 4> display(GxEPD2_730c_GDEY073D46(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
 
+// GDEP073E01 - 7C, 800x480px, 7.3"
+#elif defined D_GDEP073E01
+GxEPD2_7C<GxEPD2_730c_GDEP073E01, GxEPD2_730c_GDEP073E01::HEIGHT / 4> display(GxEPD2_730c_GDEP073E01(PIN_SS, PIN_DC, PIN_RST, PIN_BUSY));
+
 #else
   #error "ePaper display not defined!"
 #endif
+
 
 ////////////////////////////
 // Library etc. includes
@@ -387,6 +502,11 @@ GxEPD2_7C<GxEPD2_730c_GDEY073D46, GxEPD2_730c_GDEY073D46::HEIGHT / 4> display(Gx
 #include <QRCodeGenerator.h>
 QRCode qrcode;
 
+#ifdef ES3ink
+  #include <Adafruit_NeoPixel.h>
+  Adafruit_NeoPixel pixel(1, RGBledPin, NEO_GRB + NEO_KHZ800);
+#endif
+
 #ifdef REMAP_SPI
 SPIClass hspi(HSPI);
 #endif
@@ -396,16 +516,16 @@ SPIClass hspi(HSPI);
   // SHT40/41/45
   #include <Wire.h>
   #include "Adafruit_SHT4x.h"
-  Adafruit_SHT4x sht4 = Adafruit_SHT4x();
+Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
   // SCD40/41
   #include "SparkFun_SCD4x_Arduino_Library.h"
-  SCD4x SCD4(SCD4x_SENSOR_SCD41);
+SCD4x SCD4(SCD4x_SENSOR_SCD41);
 
   // BME280
   #include <Adafruit_Sensor.h>
   #include <Adafruit_BME280.h>
-  Adafruit_BME280 bme;
+Adafruit_BME280 bme;
 #endif
 
 /* ---- ADC reading - indoor Battery voltage ---- */
@@ -427,10 +547,19 @@ SPIClass hspi(HSPI);
 #elif defined TTGO_T5_v23
   #define vBatPin 35
 
+#elif defined ESP32S3Adapter
+  #define vBatPin ADC1_GPIO2_CHANNEL
+  #define dividerRatio 2.018
+
+#elif defined ESPink_V3
+  ESP32AnalogRead adc;
+  #define vBatPin 9
+  #define dividerRatio 1.7693877551
+
 #else
 ESP32AnalogRead adc;
-  #define dividerRatio 1.769
   #define vBatPin 34
+  #define dividerRatio 1.769
 #endif
 
 /* ---- Server Zivy obraz ----------------------- */
@@ -443,12 +572,15 @@ uint64_t defaultDeepSleepTime = 2; // if there is a problem with loading images,
                                    // this time will be used as fallback to try again soon
 uint64_t deepSleepTime = defaultDeepSleepTime; // actual sleep time in minutes, value is changed
                                                // by what server suggest in response headers
+/* ---------------------------------------------- */
 
+/* ---------- LowBattery threshold in Volts --------- */
 float lowBattThreshold = 3.60;                // Production value = 3.60 [3.85 for TESTING ONLY] !!!
                                               // default Low Batt Threshold, value is changed
                                               // by what server suggest in response headers
-
 /* ---------------------------------------------- */
+
+
 
 /*-------------- ePaper resolution -------------- */
 // Get display width from selected display class
@@ -478,8 +610,26 @@ const String getWifiSSID()
   String wifiSSID = WiFi.SSID();
   Serial.println("Wifi SSID: " + wifiSSID);
 
-  // Replace wifiSSID space with %20 for URL
+  // Replace special characters
+  wifiSSID.replace("%", "%25");
   wifiSSID.replace(" ", "%20");
+  wifiSSID.replace("#", "%23");
+  wifiSSID.replace("$", "%24");
+  wifiSSID.replace("&", "%26");
+  wifiSSID.replace("'", "%27");
+  wifiSSID.replace("(", "%28");
+  wifiSSID.replace(")", "%29");
+  wifiSSID.replace("*", "%2A");
+  wifiSSID.replace("+", "%2B");
+  wifiSSID.replace(",", "%2C");
+  wifiSSID.replace("/", "%2F");
+  wifiSSID.replace(":", "%3A");
+  wifiSSID.replace(";", "%3B");
+  wifiSSID.replace("=", "%3D");
+  wifiSSID.replace("?", "%3F");
+  wifiSSID.replace("@", "%40");
+  wifiSSID.replace("[", "%5B");
+  wifiSSID.replace("]", "%5D");
 
   return wifiSSID;
 }
@@ -497,12 +647,12 @@ float getBatteryVoltage()
   float volt;
   float Vbatt = 0;
 
-#ifdef ES3ink
+#if (defined ES3ink) || (defined ESP32S3Adapter)
   esp_adc_cal_characteristics_t adc_cal;
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 0, &adc_cal);
   adc1_config_channel_atten(vBatPin, ADC_ATTEN_DB_11);
 
-  Serial.println("Reading battery on ES3ink board");
+  Serial.println("Reading battery on ES3ink/ESP32S3Adapter board");
 
   digitalWrite(enableBattery, LOW);
   for(uint8_t i=0; i<10; i++){
@@ -556,6 +706,8 @@ float getBatteryVoltage()
 #elif defined TTGO_T5_v23
   esp_adc_cal_characteristics_t adc_chars;
   esp_adc_cal_value_t val_type = esp_adc_cal_characterize((adc_unit_t)ADC_UNIT_1, (adc_atten_t)ADC_ATTEN_DB_2_5, (adc_bits_width_t)ADC_WIDTH_BIT_12, 1100, &adc_chars);
+  
+  float measurement = (float) analogRead(vBatPin);
   for(uint8_t i=0; i<10; i++){
     Vbatt += (float) analogRead(vBatPin);
   }  
@@ -564,11 +716,12 @@ float getBatteryVoltage()
 #else
   // attach ADC input
   adc.attach(vBatPin);
-  // battery voltage measurement with average correction
+  // battery voltage measurement
   for(uint8_t i=0; i<10; i++){
     Vbatt += adc.readVoltage();
   }
   volt = (float)((Vbatt / 10) * dividerRatio);
+
 #endif
 
   Serial.println("Battery voltage: " + String(volt) + " V");
@@ -669,7 +822,7 @@ void displayInit()
   display.epd2.selectSPI(hspi, SPISettings(4000000, MSBFIRST, SPI_MODE0));
 #endif
 
-#ifdef ES3ink
+#if (defined ES3ink) || (defined ESP32S3Adapter) || (defined ESPink_V3)
   display.init(115200, true, 2, false); // USE THIS for Waveshare boards with "clever" reset circuit, 2ms reset pulse
 #else
   display.init();
@@ -716,17 +869,17 @@ void configModeCallback(WiFiManager *myWiFiManager)
       display.setTextColor(GxEPD_BLACK);
       centeredText("To setup or change Wi-Fi configuration", DISPLAY_RESOLUTION_X / 2, 120);
       centeredText("(with mobile data turned off):", DISPLAY_RESOLUTION_X / 2, 145);
-      centeredText("1) Connect to this AP:", DISPLAY_RESOLUTION_X / 4, 190);
-      centeredText("2) Open in web browser:", DISPLAY_RESOLUTION_X * 3 / 4, 190);
+      centeredText("1) Connect to this AP:", DISPLAY_RESOLUTION_X / 4, (DISPLAY_RESOLUTION_Y / 2) - 50);
+      centeredText("2) Open in web browser:", DISPLAY_RESOLUTION_X * 3 / 4, (DISPLAY_RESOLUTION_Y / 2) - 50);
 
       drawQrCode(qrString.c_str(), 4, (DISPLAY_RESOLUTION_Y / 2) + 40, DISPLAY_RESOLUTION_X / 4, 4);
-      display.drawLine(DISPLAY_RESOLUTION_X / 2 - 1, 185, DISPLAY_RESOLUTION_X / 2 - 1, 405, GxEPD_BLACK);
-      display.drawLine(DISPLAY_RESOLUTION_X / 2, 185, DISPLAY_RESOLUTION_X / 2, 405, GxEPD_BLACK);
+      display.drawLine(DISPLAY_RESOLUTION_X / 2 - 1, (DISPLAY_RESOLUTION_Y / 2) - 60, DISPLAY_RESOLUTION_X / 2 - 1, (DISPLAY_RESOLUTION_Y / 2) + 170, GxEPD_BLACK);
+      display.drawLine(DISPLAY_RESOLUTION_X / 2, (DISPLAY_RESOLUTION_Y / 2) - 60, DISPLAY_RESOLUTION_X / 2, (DISPLAY_RESOLUTION_Y / 2) + 170, GxEPD_BLACK);
       drawQrCode(urlWeb.c_str(), 4, (DISPLAY_RESOLUTION_Y / 2) + 40, DISPLAY_RESOLUTION_X * 3 / 4, 4);
 
-      centeredText("SSID: " + hostname, DISPLAY_RESOLUTION_X / 4, 370);
-      centeredText("Password: " + wifiPassword, DISPLAY_RESOLUTION_X / 4, 395);
-      centeredText(urlWeb, DISPLAY_RESOLUTION_X * 3 / 4, 370);
+      centeredText("SSID: " + hostname, DISPLAY_RESOLUTION_X / 4, (DISPLAY_RESOLUTION_Y / 2) + 130);
+      centeredText("Password: " + wifiPassword, DISPLAY_RESOLUTION_X / 4, (DISPLAY_RESOLUTION_Y / 2) + 155);
+      centeredText(urlWeb, DISPLAY_RESOLUTION_X * 3 / 4, (DISPLAY_RESOLUTION_Y / 2) + 130);
       display.fillRect(0, DISPLAY_RESOLUTION_Y - 40, DISPLAY_RESOLUTION_X, DISPLAY_RESOLUTION_Y, GxEPD_BLACK);
       display.setTextColor(GxEPD_WHITE);
       centeredText("Documentation: " + urlWiki, DISPLAY_RESOLUTION_X / 2, DISPLAY_RESOLUTION_Y - 22);
@@ -898,7 +1051,6 @@ uint32_t read32(WiFiClient &client)
 bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp, const String &extraParams)
 {
   // Make an url
-
   String url = "index.php?mac=" + WiFi.macAddress() +
                (checkTimestamp ? "&timestamp_check=1" : "") +
                "&rssi=" + String(rssi) +
@@ -987,7 +1139,7 @@ bool createHttpRequest(WiFiClient &client, bool &connStatus, bool checkTimestamp
         Serial.print("LowBatt: ");
         Serial.println(battTHR);
       }
-      
+
       // Do we want to rotate display? (IE. upside down)
       if (line.startsWith("Rotate"))
       {
@@ -1113,8 +1265,8 @@ bool checkForNewTimestampOnServer(WiFiClient &client)
 
   // Measuring temperature and humidity?
 #ifdef SENSOR
-  #ifdef ESPink
-  // LaskaKit ESPInk 2.5 needs to power up uSup
+  #if (defined ESPink_V2) || (defined ESPink_V3)
+  // LaskaKit ESPink 2.5 needs to power up uSup
   setEPaperPowerOn(true);
   delay(50);
   #endif
@@ -1139,7 +1291,7 @@ bool checkForNewTimestampOnServer(WiFiClient &client)
     }
   }
 
-  #ifdef ESPink
+  #if (defined ESPink_V2) || (defined ESPink_V3)
   // Power down for now
   setEPaperPowerOn(false);
   #endif
@@ -1439,7 +1591,7 @@ void readBitmapData(WiFiClient &client)
       Serial.println(bytes_read);
     }
   }
-  else if (header == 0x315A || header == 0x325A || header == 0x335A) // ZivyObraz RLE data Z1 or Z3
+  else if (header == 0x315A || header == 0x325A || header == 0x335A) // ZivyObraz RLE data Z1, Z2 or Z3
   {
     // Z1 - 1 byte for color, 1 byte for number of repetition
     // Z3 - 2 bits for color, 6 bits for number of repetition
@@ -1583,6 +1735,7 @@ void readBitmapData(WiFiClient &client)
 void setup()
 {
   Serial.begin(115200);
+
 #ifdef ES3ink
   // Battery voltage reading via PMOS switch with series capacitor to gate.
   // can be read right after High->Low transition of enableBattery
@@ -1590,6 +1743,15 @@ void setup()
   // First write output register (PORTx) then activate output direction (DDRx). Pin will go from highZ(sleep) to HIGH without LOW pulse.
   digitalWrite(enableBattery, HIGH);
   pinMode(enableBattery, OUTPUT);
+  pinMode(RGBledPowerPin, OUTPUT);
+  digitalWrite(RGBledPowerPin, HIGH);
+  pixel.begin();
+  pixel.setBrightness(15);
+  pixel.clear();
+  for(int i=0; i<1; i++) { 
+    pixel.setPixelColor(i, pixel.Color(150, 0, 0));
+    pixel.show();
+  }
 #endif
 
 #ifdef M5StackCoreInk
@@ -1618,7 +1780,7 @@ void setup()
 
   // WiFi SSID - get connected ssid
   ssid = getWifiSSID();
-  
+
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
 
@@ -1642,6 +1804,11 @@ void setup()
       readBitmapData(client);
     } while (display.nextPage());
 
+    delay(1000);
+//    Serial.print("draw4greys BEGIN");
+//    draw4greys();
+//    Serial.print("draw4greys END");
+  
     delay(100);
     // Disable power supply for ePaper
     setEPaperPowerOn(false);
@@ -1664,10 +1831,17 @@ void setup()
   }
 #endif
 
+#ifdef ES3ink
+  pixel.clear();
+  for(int i=0; i<1; i++) { 
+    pixel.setPixelColor(i, pixel.Color(0, 150, 0));
+    pixel.show();
+  }
+#endif
+
   // Deep sleep mode
   Serial.print("Going to sleep now for (minutes): ");
   Serial.println(deepSleepTime);
-
 
 #ifdef M5StackCoreInk
   display.powerOff();
@@ -1682,6 +1856,22 @@ void setup()
   #endif
   esp_deep_sleep_start();
 #endif
+}
+
+void draw4greys()
+{
+  display.setRotation(0);
+  uint16_t h = display.height() / 4;
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillRect(0, 0, display.width(), h, GxEPD_BLACK);
+    display.fillRect(0, h, display.width(), h, GxEPD_DARKGREY);
+    display.fillRect(0, 2 * h, display.width(), h, GxEPD_LIGHTGREY);
+    display.fillRect(0, 3 * h, display.width(), h, GxEPD_WHITE);
+  }
+  while (display.nextPage());
 }
 
 void loop()

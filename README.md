@@ -11,7 +11,14 @@
 
 ## :warning: For production USE original sketch from https://github.com/MultiTricker/zivyobraz-fw !!!
 
-:calendar: 20241020
+:calendar: 20241005
+* Merge changes from original repo
+* Add native INIT for GDEY075T7 Greyscale 
+*     #elif defined D_GDEY075T7
+*     GxEPD2_4G_4G<GxEPD2_750_GDEY075T7, GxEPD2_750_GDEY075T7::HEIGHT
+* 
+
+:calendar: 20240920
 * Add native support for GDEY075T7 Greyscale display via GxEPD2_4G v.1.0.8
 
 :calendar: 20240510
